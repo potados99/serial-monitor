@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -8,13 +9,25 @@ using serial_monitor.Utils;
 
 namespace serial_monitor.ViewModels
 {
-    class MainViewModel
+    class MainViewModel : INotifyPropertyChanged
     {
         /// <summary>
         /// Public singleton instance
         /// </summary>
         public static MainViewModel Instance = new MainViewModel();
 
+        #region Interface
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void Notify(string propname)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propname));
+            }
+        }
+
+        #endregion
 
         #region SerialPort
 
@@ -27,8 +40,7 @@ namespace serial_monitor.ViewModels
             {
                 if (serialDeviceInstance == null)
                 {
-                    Debugger.Log("SerialDeviceInstance not set.", Debugger.LogLevel.WARN);
-                    throw new NullReferenceException("SerialDeviceInstance not set.");
+                    Debugger.Log("Cannot get SerialDeviceInstance: serialDeviceInstance not set.", Debugger.LogLevel.ERROR);
                 }
                 return serialDeviceInstance;
             }
@@ -50,6 +62,7 @@ namespace serial_monitor.ViewModels
                 if (SerialDeviceInstance == null)
                 {
                     Debugger.Log("Cannot add RecieveEventHandler: SerialDeviceInstance is null.", Debugger.LogLevel.WARN);
+                    return;
                 }
                 SerialDeviceInstance.Recieved += value;
             }
@@ -58,82 +71,25 @@ namespace serial_monitor.ViewModels
                 if (SerialDeviceInstance == null)
                 {
                     Debugger.Log("Cannot remove RecieveEventHandler: SerialDeviceInstance is null.", Debugger.LogLevel.WARN);
+                    return;
                 }
                 SerialDeviceInstance.Recieved -= value;
             }
         }
 
+        public string[] AvailablePortNames => SerialPort.GetPortNames();
+        private string portName;
         public string PortName
         {
             get
             {
-                if (SerialDeviceInstance == null)
-                {
-                    Debugger.Log("Cannot get PortName: SerialDeviceInstance is null.", Debugger.LogLevel.WARN);
-                }
-                return SerialDeviceInstance.PortName;
+                return portName;
             }
             set
             {
-                if (SerialDeviceInstance == null)
-                {
-                    Debugger.Log("Cannot set PortName: SerialDeviceInstance is null.", Debugger.LogLevel.WARN);
-                }
-                SerialDeviceInstance.PortName = value;
-
-                SerialDeviceInstance.RecreateAndOpenPort();
+                portName = value;
             }
         }
-
-        public int BaudRate
-        {
-            get
-            {
-                if (SerialDeviceInstance == null)
-                {
-                    Debugger.Log("Cannot get BaudRate: SerialDeviceInstance is null.", Debugger.LogLevel.WARN);
-                }
-                return SerialDeviceInstance.BaudRate;
-            }
-            set
-            {
-                if (SerialDeviceInstance == null)
-                {
-                    Debugger.Log("Cannot set BaudRate: SerialDeviceInstance is null.", Debugger.LogLevel.WARN);
-                }
-                SerialDeviceInstance.BaudRate = value;
-            }
-        }
-
-        public string NewLine
-        {
-            get
-            {
-                if (SerialDeviceInstance == null)
-                {
-                    Debugger.Log("Cannot get NewLine: SerialDeviceInstance is null.", Debugger.LogLevel.WARN);
-                }
-                return SerialDeviceInstance.NewLine;
-            }
-            set
-            {
-                if (SerialDeviceInstance == null)
-                {
-                    Debugger.Log("Cannot set NewLine: SerialDeviceInstance is null.", Debugger.LogLevel.WARN);
-                }
-                SerialDeviceInstance.NewLine = value;
-            }
-        }
-
-
-        public string[] AvailablePortNames
-        {
-            get
-            {
-                return SerialPort.GetPortNames();
-            }
-        }
-
 
         public int[] AvailableBaudRates
         {
@@ -142,17 +98,39 @@ namespace serial_monitor.ViewModels
                 int[] baudRateArray = { 9600, 115200};
                 return baudRateArray;
             }
-
         }
+        private int baudRate = 9600;
+        public int BaudRate
+        {
+            get
+            {
+                return baudRate;
+            }
+            set
+            {
+                baudRate = value;
+            }
+        }
+
+        public string[] AvailableNewLines
+        {
+            get
+            {
+                string[] array = { "CR", "LF", "CR+LF" };
+                return array;
+            }
+        }
+        private string[] newLinesValueArray = { "\r", "\n", "\r\n" };
+        public int SelectedNewLineIndex { get; set; } = 1;
+        public string NewLine => newLinesValueArray[SelectedNewLineIndex];
 
         #endregion
 
-
         #region Methods
 
-        public void RecreateAndOpenSerialPort()
+        public void InitializeSerialPort()
         {
-            SerialDeviceInstance.RecreateAndOpenPort();
+            SerialDeviceInstance = new SerialDevice(PortName, BaudRate, NewLine);
         }
 
         public void WriteLine(string message)
@@ -169,5 +147,47 @@ namespace serial_monitor.ViewModels
 
         #endregion
 
+        #region View
+
+        private bool scrollLock = false;
+        public bool ScrollLock
+        {
+            get
+            {
+                return scrollLock;
+            }
+            set
+            {
+                scrollLock = value;
+            }
+        }
+
+        private bool opened = false;
+        public bool Opened
+        {
+            get
+            {
+                return opened;
+            }
+            set
+            {
+                opened = value;
+                Notify("Opened");
+                Notify("Closed");
+                Notify("PortNameComboBoxEnabled");
+                Notify("BaudRateComboBoxEnabled");
+                Notify("NewLineComboBoxEnabled");
+            }
+        }
+
+        public bool Closed => !Opened;
+
+        public bool PortNameComboBoxEnabled => (opened ? false : true); // enable only when port is closed.
+
+        public bool BaudRateComboBoxEnabled => (opened ? false : true);
+
+        public bool NewLineComboBoxEnabled => (opened ? false : true);
+
+        #endregion
     }
 }

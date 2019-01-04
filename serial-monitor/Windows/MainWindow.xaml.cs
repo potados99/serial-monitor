@@ -34,8 +34,6 @@ namespace serial_monitor.Windows
             InitializeComponent();
 
             this.DataContext = VM;
-
-
         }
 
         #endregion
@@ -51,6 +49,22 @@ namespace serial_monitor.Windows
 
         #region Button Click
 
+        private void OpenButton_Click(object sender, RoutedEventArgs e)
+        {
+            VM.Opened = true;
+            VM.InitializeSerialPort();
+            VM.Recieved += (s, m) =>
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() => { AddLine(m, Brushes.Green); }));
+            };
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            VM.Opened = false;
+            VM.DisposePort();
+        }
+
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
             var msg = GetPrompt();
@@ -60,6 +74,8 @@ namespace serial_monitor.Windows
         }
 
         #endregion
+
+        #region Helper
 
         public void AddLine(string line, SolidColorBrush colorBrush)
         {
@@ -84,21 +100,7 @@ namespace serial_monitor.Windows
             PromptTextBox.Text = "";
         }
 
-        private void PortNameComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            Debugger.Log("HEY!!!!!!", Debugger.LogLevel.DEBUG);
-            //VM.RecreateAndOpenSerialPort();
-            
-        }
+        #endregion
 
-        private void BaudRateComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            
-        }
-
-        private void ScrollLockButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

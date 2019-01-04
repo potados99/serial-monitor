@@ -20,26 +20,40 @@
         </Grid.RowDefinitions>
 
 
-        <StackPanel x:Name="ControlStackPanel" Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
-            <Label Content="Port: "/>
-            <ComboBox x:Name="PortNameComboBox" Height="20" Width="70" ItemsSource="{Binding Path=AvailablePortNames}" SelectedItem="{Binding Path=PortName}" SelectionChanged="PortNameComboBox_SelectionChanged"/>
-            <Label Content="BaudRate: "/>
-            <ComboBox x:Name="BaudRateComboBox" Height="20" Width="70" ItemsSource="{Binding Path=AvailableBaudRates}" SelectedItem="{Binding Path=BaudRate}" SelectionChanged="BaudRateComboBox_SelectionChanged"/>
+        <Grid x:Name="UpperBarGrid" Grid.Column="1" Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="180"/>
+            </Grid.ColumnDefinitions>
 
-        </StackPanel>
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Label Content="Port: "/>
+                <ComboBox x:Name="PortNameComboBox" Height="20" Width="70" ItemsSource="{Binding Path=AvailablePortNames}" SelectedItem="{Binding Path=PortName}" IsEnabled="{Binding Path=PortNameComboBoxEnabled}"/>
+                <Label Content="BaudRate: "/>
+                <ComboBox x:Name="BaudRateComboBox" Height="20" Width="70" ItemsSource="{Binding Path=AvailableBaudRates}" SelectedItem="{Binding Path=BaudRate}" IsEnabled="{Binding Path=BaudRateComboBoxEnabled}"/>
+                <Label Content="NewLine: "/>
+                <ComboBox x:Name="NewLineComboBox" Height="20" Width="70" ItemsSource="{Binding Path=AvailableNewLines}" SelectedIndex="{Binding Path=SelectedNewLineIndex}" IsEnabled="{Binding Path=NewLineComboBoxEnabled}"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Height="20">
+                <Button x:Name="OpenButton" Content="Open" Width="60" Margin="10,0,0,0" IsEnabled="{Binding Path=Closed, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Click="OpenButton_Click" />
+                <Button x:Name="CloseButton" Content="Close" Width="60" Margin="10,0,0,0" IsEnabled="{Binding Path=Opened, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Click="CloseButton_Click"/>
+            </StackPanel>
+
+        </Grid>
 
         <RichTextBox x:Name="ContentTextBox" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Grid.Column="1" Grid.Row="1"/>
 
-        <Grid Grid.Column="1" Grid.Row="2" Margin="0,10,0,10">
+        <Grid x:Name="UnderBarGrid" Grid.Column="1" Grid.Row="2" Margin="0,10,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="130"/>
+                <ColumnDefinition Width="150"/>
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="PromptTextBox" Grid.Column="0"/>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button x:Name="SendButton" Content="Send" Width="60" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" Click="SendButton_Click" Margin="5,0,0,0"/>
-                <Button x:Name="ScrollLockButton" Content="ScrollLock" Width="60" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" Click="ScrollLockButton_Click" Margin="5,0,0,0"/>
+                <CheckBox x:Name="ScrollLockButton" Content="ScrollLock" Width="80" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" IsChecked="{Binding Path=ScrollLock}" Margin="5,0,0,0"/>
             </StackPanel>
         </Grid>
         
