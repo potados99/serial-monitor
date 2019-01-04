@@ -50,7 +50,7 @@
                 <ColumnDefinition Width="150"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox x:Name="PromptTextBox" Grid.Column="0"/>
+            <TextBox x:Name="PromptTextBox" Grid.Column="0" KeyDown="PromptTextBox_KeyDown"/>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button x:Name="SendButton" Content="Send" Width="60" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" Click="SendButton_Click" Margin="5,0,0,0"/>
                 <CheckBox x:Name="ScrollLockButton" Content="ScrollLock" Width="80" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" IsChecked="{Binding Path=ScrollLock}" Margin="5,0,0,0"/>

@@ -45,6 +45,14 @@ namespace serial_monitor.Windows
             VM.DisposePort();
         }
 
+        private void PromptTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                Send();
+            }
+        }
+
         #endregion
 
         #region Button Click
@@ -67,15 +75,20 @@ namespace serial_monitor.Windows
 
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
-            var msg = GetPrompt();
-            VM.WriteLine(msg);
-            AddLine(msg, Brushes.Orange);
-            ClearPrompt();
+            Send();
         }
 
         #endregion
 
         #region Helper
+
+        private void Send()
+        {
+            var msg = GetPrompt();
+            VM.WriteLine(msg);
+            AddLine(msg, Brushes.Orange);
+            ClearPrompt();
+        }
 
         public void AddLine(string line, SolidColorBrush colorBrush)
         {
@@ -87,7 +100,10 @@ namespace serial_monitor.Windows
 
             tr.ApplyPropertyValue(TextElement.ForegroundProperty, colorBrush);
 
-            ContentTextBox.ScrollToEnd();
+            if (! VM.ScrollLock)
+            {
+                ContentTextBox.ScrollToEnd();
+            }
         }
 
         private string GetPrompt()
@@ -101,6 +117,7 @@ namespace serial_monitor.Windows
         }
 
         #endregion
+
 
     }
 }
