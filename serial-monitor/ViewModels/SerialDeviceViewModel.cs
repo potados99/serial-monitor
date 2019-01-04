@@ -24,12 +24,6 @@ namespace serial_monitor.ViewModels
                 return false;
             }
 
-            var p = SerialDeviceInstance.Port;
-
-            p.BaudRate = BaudRate;
-            p.NewLine = NewLine;
-            p.ReadTimeout = ReadTimeOut;
-
             return true;
         }
 
@@ -69,42 +63,51 @@ namespace serial_monitor.ViewModels
             }
         }
 
-        private int baudRate = 9600;
         public int BaudRate
         {
             get
             {
-                return baudRate;
+                return SerialDeviceInstance.Port.BaudRate;
             }
             set
             {
-                baudRate = value;
+                SerialDeviceInstance.Port.BaudRate = value;
             }
         }
 
-        private string newLine = "\n";
         public string NewLine
         {
             get
             {
-                return newLine;
+                return SerialDeviceInstance.Port.NewLine;
             }
             set
             {
-                newLine = value;
+                SerialDeviceInstance.Port.NewLine = value;
             }
         }
 
-        private int readTimeOut = 1000;
         public int ReadTimeOut
         {
             get
             {
-                return readTimeOut;
+                return SerialDeviceInstance.Port.ReadTimeout;
             }
             set
             {
-                readTimeOut = value;
+                SerialDeviceInstance.Port.ReadTimeout = value;
+            }
+        }
+
+        public event SerialDevice.RecieveEventHandler Recieved
+        {
+            add
+            {
+                SerialDeviceInstance.Recieved += value;
+            }
+            remove
+            {
+                SerialDeviceInstance.Recieved -= value;
             }
         }
     }

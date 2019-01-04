@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using serial_monitor.ViewModels;
 
 namespace serial_monitor.Windows
 {
@@ -22,6 +23,15 @@ namespace serial_monitor.Windows
         public MainWindow()
         {
             InitializeComponent();
+
+            var vm = SerialDeviceViewModel.Instance;
+
+            vm.CreateSerialDevice("COM10");
+            vm.Recieved += (s, e) =>
+            {
+                Console.WriteLine("HEY YA");
+                Console.WriteLine(e);
+            };
         }
     }
 }

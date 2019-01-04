@@ -7,6 +7,18 @@
         mc:Ignorable="d"
         Title="Serial Monitor" Height="450" Width="800">
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="20"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="ContentTextBox" Grid.Column="1" Grid.Row="1"/>
+
     </Grid>
 </Window>

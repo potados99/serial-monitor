@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using serial_monitor.Utils;
 
 namespace serial_monitor.Models
@@ -16,6 +17,8 @@ namespace serial_monitor.Models
         #endregion
 
         #region Variables
+
+        private Thread ReadThread;
 
         #endregion
 
@@ -31,11 +34,27 @@ namespace serial_monitor.Models
             }
         }
 
+        public bool HasSomethingToRead
+        {
+            get
+            {
+                return Port.BytesToRead > 0;
+            }
+        }
+
         #endregion
 
+        #region Event
+
+        public delegate void RecieveEventHandler(object sender, string message);
+
+        public event RecieveEventHandler Recieved;
+
+        #endregion
+
+        #region Constructor & Destructor
         public SerialDevice(string comport)
         {
-
             try
             {
                 Port = new SerialPort(comport);
@@ -45,6 +64,10 @@ namespace serial_monitor.Models
                 Port.Open();
 
                 Debugger.Log("Opened SerialPort on " + comport + ".", Debugger.LogLevel.INFO);
+
+                ReadThread = new Thread(new ThreadStart(ListenLoop));
+
+                StartListen();
             }
 
             catch (System.IO.IOException)
@@ -60,7 +83,7 @@ namespace serial_monitor.Models
                 // Wrong port name
                 Debugger.Log("Port open failed due to ArgumentException.", Debugger.LogLevel.FATAL);
 
-                throw new System.ArgumentException("[처리됨] 포트 이름이 올바르지 않거나 사용 가능한 포트가 없습니다. portForUse: [" + (String.IsNullOrEmpty(PortName) ? "null" : PortName) + "]");
+                throw new System.ArgumentException("[처리됨] 포트 이름이 올바르지 않거나 사용 가능한 포트가 없습니다. portForUse: [" + (String.IsNullOrEmpty(Port.PortName) ? "null" : Port.PortName) + "]");
             }
 
             catch (System.UnauthorizedAccessException)
@@ -72,117 +95,85 @@ namespace serial_monitor.Models
             }
         }
 
-        /// <summary>
-        /// 데이터를 보냅니다.
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="read"></param>
-        /// <returns></returns>
-        protected string Send(string data, bool read = false)
+        ~SerialDevice() {
+            EndListen();
+
+            Port.Close();
+        }
+        #endregion
+
+        #region Write & Read
+
+        public void WriteLine(string payload)
         {
-
-            long startTime = DateTime.Now.Millisecond;
-
-            if (startTime - LastSentTime < 600)
-            {
-                Debugger.Log("Attempting too frequently!", Debugger.LogLevel.WARN);
-
-                return null;
-            }
-
-            LastSentTime = DateTime.Now.Ticks;
-
-            Debugger.Log("Assigned LastSentTime.", Debugger.LogLevel.TRACE);
-
-            string recieved = null;
-
-            try
-            {
-                Port.WriteLine(data);
-
-                Debugger.Log("Successfully Sent " + data + " to port " + PortName + " successfully.", Debugger.LogLevel.INFO);
-
-                if (read)
-                {
-                    recieved = Port.ReadLine(); /* read until NewLine arrives */
-
-                    Debugger.Log("Successfully Read " + data + " from port " + PortName + " successfully", Debugger.LogLevel.INFO);
-
-                    if (string.IsNullOrEmpty(recieved))
-                    {
-                        Debugger.Log("Recieved data is empty.", Debugger.LogLevel.WARN);
-
-                        return null; /* if not recieved expected data */
-                    }
-                }
-
-                Debugger.Log("Returning recieved data.", Debugger.LogLevel.TRACE);
-
-                return recieved;
-            }
-            catch (System.NullReferenceException)
-            {
-                Debugger.Log("Send failed due to NullReferenceException.", Debugger.LogLevel.FATAL);
-
-                throw new System.NullReferenceException("[처리됨] 객체 참조가 유효하지 않습니다.");
-            }
-            catch (System.InvalidOperationException)
-            {
-                // Port is not opened
-                Debugger.Log("Send failed due to InvalidOperationException.", Debugger.LogLevel.FATAL);
-
-                throw new System.InvalidOperationException("[처리됨] 포트가 닫혀있습니다.");
-            }
-            catch (System.TimeoutException)
-            {
-                // Read time out
-                Debugger.Log("Send failed due to TimeoutException.", Debugger.LogLevel.FATAL);
-
-                throw new System.TimeoutException("[처리됨] 장비가 응답하지 않습니다.");
-            }
-            catch (System.UnauthorizedAccessException)
-            {
-                Debugger.Log("Send failed due to UnauthorizedAccessException.", Debugger.LogLevel.FATAL);
-
-                throw new System.UnauthorizedAccessException("[처리됨] 장비가 응답하지 않습니다.");
-            }
-            catch (System.IO.IOException)
-            {
-                Debugger.Log("Send failed due to IOException.", Debugger.LogLevel.FATAL);
-
-                throw new System.IO.IOException("[처리됨] 부착된 장비가 응답하지 않습니다.");
-            }
-            catch (Exception e)
-            {
-                Debugger.Log("Send failed due to unhandled exception.", Debugger.LogLevel.FATAL);
-
-                Console.WriteLine(e.ToString());
-
-                throw new Exception("[처리되지 않음] 예외입니다.");
-            }
-
+            Port.WriteLine(payload);
         }
 
-        /// <summary>
-        /// 포트를 닫습니다. 불가능할 경우 false를 반환합니다.
-        /// </summary>
-        /// <returns></returns>
+        public string ReadLine()
+        {
+            return Port.ReadLine();
+        }
+
+        private void ListenLoop()
+        {
+            while(true)
+            {
+                if (HasSomethingToRead)
+                {
+                    Recieved(this, ReadLine());
+                }
+            }
+        }
+
+        #endregion
+
+        #region Read Thread Control
+
+        private void StartListen()
+        {
+            if (ReadThread == null)
+            {
+                Debugger.Log("ReadThread is null.", Debugger.LogLevel.WARN);
+                return;
+            }
+
+            ReadThread.Start();
+        }
+
+        private void EndListen()
+        {
+            if (ReadThread == null)
+            {
+                Debugger.Log("ReadThread is null.", Debugger.LogLevel.WARN);
+                return;
+            }
+
+            ReadThread.Abort();
+        }
+
+        #endregion
+
+        #region Port Control
+
         public bool Close()
         {
             if (this.Port != null && this.Port.IsOpen)
             {
                 this.Port.Close();
 
-                Debugger.Log("Port " + PortName + " closed.", Debugger.LogLevel.INFO);
+                Debugger.Log("Port " + Port.PortName + " closed.", Debugger.LogLevel.INFO);
 
                 return true;
             }
 
             else
             {
-                Debugger.Log("Failed to close port " + PortName + ".", Debugger.LogLevel.INFO);
+                Debugger.Log("Failed to close port " + Port.PortName + ".", Debugger.LogLevel.INFO);
 
                 return false;
             }
         }
+
+        #endregion
     }
+}
