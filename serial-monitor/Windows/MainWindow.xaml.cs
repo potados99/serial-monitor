@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using serial_monitor.Utils;
 using serial_monitor.ViewModels;
 
 namespace serial_monitor.Windows
@@ -20,18 +21,84 @@ namespace serial_monitor.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region Variables
+
+        MainViewModel VM = MainViewModel.Instance;
+
+        #endregion
+
+        #region Constructor
+
         public MainWindow()
         {
             InitializeComponent();
 
-            var vm = SerialDeviceViewModel.Instance;
+            this.DataContext = VM;
 
-            vm.CreateSerialDevice("COM10");
-            vm.Recieved += (s, e) =>
+
+        }
+
+        #endregion
+
+        #region Event
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            VM.DisposePort();
+        }
+
+        #endregion
+
+        #region Button Click
+
+        private void SendButton_Click(object sender, RoutedEventArgs e)
+        {
+            var msg = GetPrompt();
+            VM.WriteLine(msg);
+            AddLine(msg, Brushes.Orange);
+            ClearPrompt();
+        }
+
+        #endregion
+
+        public void AddLine(string line, SolidColorBrush colorBrush)
+        {
+            var tp = ContentTextBox.Document.ContentEnd;
+            var tr = new TextRange(tp, tp)
             {
-                Console.WriteLine("HEY YA");
-                Console.WriteLine(e);
+                Text = line + VM.NewLine
             };
+
+            tr.ApplyPropertyValue(TextElement.ForegroundProperty, colorBrush);
+
+            ContentTextBox.ScrollToEnd();
+        }
+
+        private string GetPrompt()
+        {
+            return PromptTextBox.Text;
+        }
+
+        private void ClearPrompt()
+        {
+            PromptTextBox.Text = "";
+        }
+
+        private void PortNameComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Debugger.Log("HEY!!!!!!", Debugger.LogLevel.DEBUG);
+            //VM.RecreateAndOpenSerialPort();
+            
+        }
+
+        private void BaudRateComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            
+        }
+
+        private void ScrollLockButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

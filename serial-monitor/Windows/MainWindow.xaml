@@ -5,20 +5,46 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:serial_monitor"
         mc:Ignorable="d"
-        Title="Serial Monitor" Height="450" Width="800">
+        Title="Serial Monitor" Height="450" Width="800"
+        Closing="Window_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="15"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="15"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="45"/>
         </Grid.RowDefinitions>
 
-        <TextBlock x:Name="ContentTextBox" Grid.Column="1" Grid.Row="1"/>
+
+        <StackPanel x:Name="ControlStackPanel" Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
+            <Label Content="Port: "/>
+            <ComboBox x:Name="PortNameComboBox" Height="20" Width="70" ItemsSource="{Binding Path=AvailablePortNames}" SelectedItem="{Binding Path=PortName}" SelectionChanged="PortNameComboBox_SelectionChanged"/>
+            <Label Content="BaudRate: "/>
+            <ComboBox x:Name="BaudRateComboBox" Height="20" Width="70" ItemsSource="{Binding Path=AvailableBaudRates}" SelectedItem="{Binding Path=BaudRate}" SelectionChanged="BaudRateComboBox_SelectionChanged"/>
+
+        </StackPanel>
+
+        <RichTextBox x:Name="ContentTextBox" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" Grid.Column="1" Grid.Row="1"/>
+
+        <Grid Grid.Column="1" Grid.Row="2" Margin="0,10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="130"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="PromptTextBox" Grid.Column="0"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button x:Name="SendButton" Content="Send" Width="60" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" Click="SendButton_Click" Margin="5,0,0,0"/>
+                <Button x:Name="ScrollLockButton" Content="ScrollLock" Width="60" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Right" Click="ScrollLockButton_Click" Margin="5,0,0,0"/>
+            </StackPanel>
+        </Grid>
+        
+
+      
 
     </Grid>
 </Window>

@@ -24,9 +24,67 @@ namespace serial_monitor.Models
 
         #region Properties
 
-        public SerialPort Port { get; set; }
+        private SerialPort Port { get; set; }
 
-        public bool IsOpen
+        private string portName;
+        public string PortName
+        {
+            get
+            {
+                return portName;
+            }
+            set
+            {
+                portName = value;
+                Port.PortName = value;
+            }
+        }
+
+        private int baudRate = 9600;
+        public int BaudRate
+        {
+            get
+            {
+                return baudRate;
+            }
+            set
+            {
+                baudRate = value;
+                Port.BaudRate = value;
+            }
+        }
+
+        private string newLine = "\n";
+        public string NewLine
+        {
+            get
+            {
+                return newLine;
+            }
+            set
+            {
+                newLine = value;
+                Port.NewLine = value;
+            }
+        }
+
+        private event RecieveEventHandler InvokeRecievedEventHandler;
+        public event RecieveEventHandler Recieved
+        {
+            add
+            {
+                InvokeRecievedEventHandler += value;
+                Debugger.Log("RecievedEventHandler added.", Debugger.LogLevel.INFO);
+            }
+            remove
+            {
+                InvokeRecievedEventHandler -= value;
+                Debugger.Log("RecievedEventHandler removed.", Debugger.LogLevel.INFO);
+            }
+        }
+
+
+        private bool IsOpen
         {
             get
             {
@@ -34,7 +92,7 @@ namespace serial_monitor.Models
             }
         }
 
-        public bool HasSomethingToRead
+        private bool HasSomethingToRead
         {
             get
             {
@@ -48,58 +106,19 @@ namespace serial_monitor.Models
 
         public delegate void RecieveEventHandler(object sender, string message);
 
-        public event RecieveEventHandler Recieved;
-
         #endregion
 
         #region Constructor & Destructor
+
         public SerialDevice(string comport)
         {
-            try
-            {
-                Port = new SerialPort(comport);
-
-                Debugger.Log("Created SerialPort on " + comport + ".", Debugger.LogLevel.INFO);
-
-                Port.Open();
-
-                Debugger.Log("Opened SerialPort on " + comport + ".", Debugger.LogLevel.INFO);
-
-                ReadThread = new Thread(new ThreadStart(ListenLoop));
-
-                StartListen();
-            }
-
-            catch (System.IO.IOException)
-            {
-                // No port
-                Debugger.Log("Port open failed due to IOException.", Debugger.LogLevel.FATAL);
-
-                throw new System.IO.IOException("[처리됨] 포트를 열지 못했습니다.");
-            }
-
-            catch (System.ArgumentException)
-            {
-                // Wrong port name
-                Debugger.Log("Port open failed due to ArgumentException.", Debugger.LogLevel.FATAL);
-
-                throw new System.ArgumentException("[처리됨] 포트 이름이 올바르지 않거나 사용 가능한 포트가 없습니다. portForUse: [" + (String.IsNullOrEmpty(Port.PortName) ? "null" : Port.PortName) + "]");
-            }
-
-            catch (System.UnauthorizedAccessException)
-            {
-                // Can't open port
-                Debugger.Log("Port open failed due to UnauthorizedAccessException.", Debugger.LogLevel.FATAL);
-
-                throw new System.UnauthorizedAccessException("[처리됨] 허가되지 않은 접근입니다.");
-            }
+            CreateAndOpenPort(comport);
         }
 
         ~SerialDevice() {
-            EndListen();
-
-            Port.Close();
+            Dispose();
         }
+
         #endregion
 
         #region Write & Read
@@ -120,7 +139,7 @@ namespace serial_monitor.Models
             {
                 if (HasSomethingToRead)
                 {
-                    Recieved(this, ReadLine());
+                    InvokeRecievedEventHandler(this, ReadLine());
                 }
             }
         }
@@ -155,9 +174,73 @@ namespace serial_monitor.Models
 
         #region Port Control
 
+        public void CreateAndOpenPort(string portname)
+        {
+            try
+            {
+                Port = new SerialPort()
+                {
+                    PortName = PortName,
+                    BaudRate = BaudRate,
+                    NewLine = NewLine
+                };
+
+                Debugger.Log("Created SerialPort on " + portname + ".", Debugger.LogLevel.INFO);
+
+                Port.Open();
+
+                Debugger.Log("Opened SerialPort on " + portname + ".", Debugger.LogLevel.INFO);
+
+                ReadThread = new Thread(new ThreadStart(ListenLoop));
+
+                StartListen();
+            }
+
+            catch (System.IO.IOException)
+            {
+                // No port
+                Debugger.Log("Port open failed due to IOException.", Debugger.LogLevel.FATAL);
+
+                throw new System.IO.IOException("[처리됨] 포트를 열지 못했습니다.");
+            }
+
+            catch (System.ArgumentException)
+            {
+                // Wrong port name
+                Debugger.Log("Port open failed due to ArgumentException.", Debugger.LogLevel.FATAL);
+
+                throw new System.ArgumentException("[처리됨] 포트 이름이 올바르지 않거나 사용 가능한 포트가 없습니다. portForUse: [" + (String.IsNullOrEmpty(Port.PortName) ? "null" : Port.PortName) + "]");
+            }
+
+            catch (System.UnauthorizedAccessException)
+            {
+                // Can't open port
+                Debugger.Log("Port open failed due to UnauthorizedAccessException.", Debugger.LogLevel.FATAL);
+
+                throw new System.UnauthorizedAccessException("[처리됨] 허가되지 않은 접근입니다.");
+            }
+        }
+
+        public void RecreateAndOpenPort()
+        {
+            Debugger.Log("Will Dispose port " + PortName, Debugger.LogLevel.INFO);
+            Dispose();
+            Debugger.Log("Did Dispose port " + PortName, Debugger.LogLevel.INFO);
+
+            CreateAndOpenPort(PortName);
+        }
+
+        public void Dispose()
+        {
+            EndListen();
+            Debugger.Log("Listen stopped on " + PortName, Debugger.LogLevel.INFO);
+
+            Close();
+        }
+
         public bool Close()
         {
-            if (this.Port != null && this.Port.IsOpen)
+            if (IsOpen)
             {
                 this.Port.Close();
 

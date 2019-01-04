@@ -61,7 +61,6 @@
     <Compile Include="Models\SerialWrapper.cs" />
     <Compile Include="Utils\Debugger.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
-    <Compile Include="ViewModels\SerialDeviceViewModel.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
