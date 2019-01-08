@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using serial_monitor.Models;
+using serial_monitor.Utils;
+using System;
 using System.ComponentModel;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
-using serial_monitor.Models;
-using serial_monitor.Utils;
 using System.Windows;
 
 namespace serial_monitor.ViewModels

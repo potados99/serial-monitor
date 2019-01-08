@@ -1,16 +1,7 @@
-﻿using System;
+﻿using serial_monitor.Utils;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using serial_monitor.Utils;
 
 namespace serial_monitor.Windows
 {
@@ -19,8 +10,14 @@ namespace serial_monitor.Windows
     /// </summary>
     public partial class LogWindow : Window
     {
+        #region Fields
+
         private static int Instances = 0;
         private static List<string> LogList = new List<string>();
+
+        #endregion
+
+        #region Constructor
 
         public LogWindow()
         {
@@ -33,7 +30,7 @@ namespace serial_monitor.Windows
             Debugger.LogRaised += Log_Raised;
         }
 
-
+        #endregion
 
         #region Event Handler
 

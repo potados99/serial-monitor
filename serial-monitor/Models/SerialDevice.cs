@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using serial_monitor.Utils;
+using System;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows;
-using serial_monitor.Utils;
 
 namespace serial_monitor.Models
 {
@@ -261,8 +256,6 @@ namespace serial_monitor.Models
         {
             while(true)
             {
-                Thread.Sleep(1);
-
                 if (HasSomethingToRead)
                 {
                     string recieved = ReadLine();
