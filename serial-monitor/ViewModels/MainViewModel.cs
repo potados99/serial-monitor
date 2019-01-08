@@ -120,7 +120,7 @@ namespace serial_monitor.ViewModels
                 return array;
             }
         }
-        private string[] newLinesValueArray = { "\r", "\n", "\r\n" };
+        private readonly string[] newLinesValueArray = { "\r", "\n", "\r\n" };
         public int SelectedNewLineIndex { get; set; } = 1;
         public string NewLine => newLinesValueArray[SelectedNewLineIndex];
 
@@ -130,7 +130,14 @@ namespace serial_monitor.ViewModels
 
         public void InitializeSerialPort()
         {
-            SerialDeviceInstance = new SerialDevice(PortName, BaudRate, NewLine);
+            try
+            {
+                SerialDeviceInstance = new SerialDevice(PortName, BaudRate, NewLine);
+            }
+            catch (ArgumentException)
+            {
+                System.Windows.MessageBox.Show("Wrong argument.");
+            }
         }
 
         public void WriteLine(string message)
@@ -140,7 +147,10 @@ namespace serial_monitor.ViewModels
 
         public void DisposePort()
         {
-            SerialDeviceInstance.Dispose();
+            if (SerialDeviceInstance != null)
+            {
+                SerialDeviceInstance.Dispose();
+            }
         }
 
         #endregion
