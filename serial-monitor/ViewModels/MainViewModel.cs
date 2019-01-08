@@ -84,7 +84,7 @@ namespace serial_monitor.ViewModels
 
         // Port name
         public string[] AvailablePortNames => SerialPort.GetPortNames();
-        public string PortName { get; set; }
+        public string PortName { get; set; } = SerialPort.GetPortNames().Last();
 
         // Baudrate
         public int[] AvailableBaudRates { get; } = { 9600, 115200 };

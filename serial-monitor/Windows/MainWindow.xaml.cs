@@ -43,6 +43,7 @@ namespace serial_monitor.Windows
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             VM.DisposePort();
+            App.Current.Shutdown();
         }
 
         private void PromptTextBox_KeyDown(object sender, KeyEventArgs e)
@@ -115,7 +116,15 @@ namespace serial_monitor.Windows
         private void SendToPort()
         {
             var message = GetPrompt();
-            VM.WriteLine(message);
+
+            if (! VM.WriteLine(message))
+            {
+                Debugger.Log("Failed to write to port.", Debugger.LogLevel.WARN);
+
+                return;
+            }
+            Debugger.Log("Successfully wrote \"" + message + "\"" + " to port.", Debugger.LogLevel.DEBUG);
+
             AddLine(message, Brushes.Orange);
             ClearPrompt();
         }
@@ -123,17 +132,23 @@ namespace serial_monitor.Windows
         public void AddLine(string line, SolidColorBrush colorBrush)
         {
             var tp = ContentTextBox.Document.ContentEnd;
+
             var tr = new TextRange(tp, tp)
             {
-                Text = line + VM.NewLine
+                Text = line + '\r'
             };
-
+ 
             tr.ApplyPropertyValue(TextElement.ForegroundProperty, colorBrush);
 
             if (! VM.ScrollLock)
             {
                 ContentTextBox.ScrollToEnd();
             }
+        }
+
+        private void ClearLogBox()
+        {
+            ContentTextBox.Document.Blocks.Clear();
         }
 
         private string GetPrompt()
@@ -147,5 +162,10 @@ namespace serial_monitor.Windows
         }
 
         #endregion
+
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClearLogBox();
+        }
     }
 }

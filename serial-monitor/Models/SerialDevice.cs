@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using serial_monitor.Utils;
@@ -264,7 +265,11 @@ namespace serial_monitor.Models
 
                 if (HasSomethingToRead)
                 {
-                    InvokeRecieved?.Invoke(this, ReadLine());
+                    string recieved = ReadLine();
+                    string EscPresentation = recieved.Replace("\t", "\\t").Replace("\r", "\\r").Replace("\n", "\\n");
+
+                    Debugger.Log("Recieved \"" + EscPresentation + "\".", Debugger.LogLevel.DEBUG);
+                    InvokeRecieved?.Invoke(this, recieved);
                 }
             }
         }
