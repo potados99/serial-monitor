@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -73,12 +74,29 @@ namespace serial_monitor.Windows
             SendToPort();
         }
 
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClearLogBox();
+        }
+
         private void ShowLogItem_Click(object sender, RoutedEventArgs e)
         {
             if (LogWindow.GetNumberOfInstances() == 0)
             {
                 new LogWindow().Show();
             }
+        }
+
+        private void AppInfoItem_Click(object sender, RoutedEventArgs e)
+        {
+            var ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+            MessageBox.Show(
+                "Serial Monitor\n" +
+                "Version " + ver.ToString() + "\n\n" +
+                "Copyright © 2019 Potados All Rights Reserved.",
+                "Application Information"
+                );
         }
 
         #endregion
@@ -165,10 +183,5 @@ namespace serial_monitor.Windows
         }
 
         #endregion
-
-        private void ClearButton_Click(object sender, RoutedEventArgs e)
-        {
-            ClearLogBox();
-        }
     }
 }

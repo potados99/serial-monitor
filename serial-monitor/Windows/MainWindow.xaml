@@ -10,6 +10,8 @@
     <Window.Resources>
         <ContextMenu x:Key="MainContextMenu">
             <MenuItem x:Name="ShowLogItem" Header="Show Logs" Click="ShowLogItem_Click"/>
+            <Separator />
+            <MenuItem x:Name="AppInfoItem" Header="Application Info" Click="AppInfoItem_Click"/>
         </ContextMenu>
     </Window.Resources>
     
