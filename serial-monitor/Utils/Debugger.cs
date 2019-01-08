@@ -18,12 +18,20 @@ namespace serial_monitor.Utils
             FATAL = 5
         }
 
+        public delegate void LogEventHandler(string log);
+        public static event LogEventHandler LogRaised;
+
+        public static Queue<string> LogQueue { get; set; } = new Queue<string>(1024);
+
         [Conditional("DEBUG")]
         public static void Log(string message, LogLevel level = LogLevel.DEBUG)
         {
             string caller = new StackFrame(1).GetMethod().Name;
+            string log = "[" + level.ToString() + "]" + " at " + caller + ": " + message;
 
-            Console.WriteLine("[" + level.ToString() + "]" + " at " + caller + ": " + message);
+            Console.WriteLine(log);
+            LogQueue.Enqueue(log);
+            LogRaised?.Invoke(log);
         }
     }
 }

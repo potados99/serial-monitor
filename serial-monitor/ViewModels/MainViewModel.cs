@@ -44,7 +44,7 @@ namespace serial_monitor.ViewModels
             {
                 if (serialDeviceInstance == null)
                 {
-                    Debugger.Log("Cannot get SerialDeviceInstance: serialDeviceInstance not set.", Debugger.LogLevel.ERROR);
+                    Debugger.Log("Cannot get SerialDeviceInstance: serialDeviceInstance not set.", Debugger.LogLevel.WARN);
                 }
                 return serialDeviceInstance;
             }

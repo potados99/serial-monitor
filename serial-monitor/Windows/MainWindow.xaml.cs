@@ -21,9 +21,9 @@ namespace serial_monitor.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
-        #region Variables
+        #region Fields
 
-        MainViewModel VM = MainViewModel.Instance;
+        private MainViewModel VM = MainViewModel.Instance;
 
         #endregion
 
@@ -70,6 +70,14 @@ namespace serial_monitor.Windows
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
             SendToPort();
+        }
+
+        private void ShowLogItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (LogWindow.GetNumberOfInstances() == 0)
+            {
+                new LogWindow().Show();
+            }
         }
 
         #endregion
@@ -139,7 +147,5 @@ namespace serial_monitor.Windows
         }
 
         #endregion
-
-
     }
 }

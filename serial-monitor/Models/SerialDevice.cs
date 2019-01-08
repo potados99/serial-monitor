@@ -209,10 +209,6 @@ namespace serial_monitor.Models
             }
         }
 
-        ~SerialDevice() {
-            Dispose();
-        }
-
         #endregion
 
         #region Write & Read
@@ -264,6 +260,8 @@ namespace serial_monitor.Models
         {
             while(true)
             {
+                Thread.Sleep(1);
+
                 if (HasSomethingToRead)
                 {
                     InvokeRecieved?.Invoke(this, ReadLine());
