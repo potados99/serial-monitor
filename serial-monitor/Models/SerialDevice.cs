@@ -266,9 +266,6 @@ namespace serial_monitor.Models
                 if (HasSomethingToRead)
                 {
                     string recieved = ReadLine();
-                    string EscPresentation = recieved.Replace("\t", "\\t").Replace("\r", "\\r").Replace("\n", "\\n");
-
-                    Debugger.Log("Recieved \"" + EscPresentation + "\".", Debugger.LogLevel.DEBUG);
                     InvokeRecieved?.Invoke(this, recieved);
                 }
             }

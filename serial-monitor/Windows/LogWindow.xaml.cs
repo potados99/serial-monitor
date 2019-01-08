@@ -20,41 +20,72 @@ namespace serial_monitor.Windows
     public partial class LogWindow : Window
     {
         private static int Instances = 0;
+        private static List<string> LogList = new List<string>();
 
         public LogWindow()
         {
             Instances += 1;
             InitializeComponent();
 
-            // flush all
-            while (Debugger.LogQueue.Count > 0)
-            {
-                AddLog();
-            }
+            FillLogListFromQueue();
+            RestoreLogs();
 
-            Debugger.LogRaised += (log) =>
-            {
-                Application.Current.Dispatcher.Invoke(new Action(() => { AddLog(); }));
-            };
+            Debugger.LogRaised += Log_Raised;
+        }
+
+
+
+        #region Event Handler
+
+        private void Log_Raised(string log)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() => { AddLog(); }));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Instances -= 1;
+            Debugger.LogRaised -= Log_Raised;
+        }
+
+        #endregion
+
+        #region Helper
+
+        private void FillLogListFromQueue()
+        {
+            LogList.AddRange(Debugger.LogQueue);
+        }
+
+        private void RestoreLogs()
+        {
+            foreach (var log in LogList)
+            {
+                LogTextBox.AppendText(log + Environment.NewLine);
+            }
+
+            LogTextBox.ScrollToEnd();
         }
 
         private void AddLog()
         {
-            if (Debugger.LogQueue.Count > 0)
+            var Q = Debugger.LogQueue;
+            while (Q.Count > 0)
             {
-                LogTextBox.AppendText(Debugger.LogQueue.Dequeue() + Environment.NewLine);
-                LogTextBox.ScrollToEnd();
+                var log = Q.Dequeue();
+
+                LogList.Add(log);
+                LogTextBox.AppendText(log + Environment.NewLine);
             }
+
+            LogTextBox.ScrollToEnd();
         }
 
         public static int GetNumberOfInstances()
         {
             return Instances;
         }
+
+        #endregion
     }
 }

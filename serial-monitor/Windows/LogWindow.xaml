@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:serial_monitor.Windows"
         mc:Ignorable="d"
-        Title="LogWindow" Height="300" Width="700"
+        Title="Logs" Height="300" Width="700"
         Closing="Window_Closing">
     <Grid>
         <TextBox Name="LogTextBox" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="true" Margin="10,10,10,10"/>

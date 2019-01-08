@@ -97,6 +97,9 @@ namespace serial_monitor.Windows
             VM.Opened = true;
             VM.Recieved += (s, m) =>
             {
+                string EscPresentation = m.Replace("\t", "\\t").Replace("\r", "\\r").Replace("\n", "\\n");
+
+                Debugger.Log("Recieved \"" + EscPresentation + "\" and newline.", Debugger.LogLevel.DEBUG);
                 Application.Current.Dispatcher.Invoke(new Action(() => { AddLine(m, Brushes.Green); }));
             };
         }
@@ -123,7 +126,7 @@ namespace serial_monitor.Windows
 
                 return;
             }
-            Debugger.Log("Successfully wrote \"" + message + "\"" + " to port.", Debugger.LogLevel.DEBUG);
+            Debugger.Log("Sent \"" + message + "\" and newline.", Debugger.LogLevel.DEBUG);
 
             AddLine(message, Brushes.Orange);
             ClearPrompt();

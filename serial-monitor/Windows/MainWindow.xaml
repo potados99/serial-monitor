@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:serial_monitor"
         mc:Ignorable="d"
-        Title="Serial Monitor" Height="450" Width="800"
+        Title="Serial Monitor" Height="400" Width="700"
         Closing="Window_Closing">
     <Window.Resources>
         <ContextMenu x:Key="MainContextMenu">
@@ -15,21 +15,21 @@
     
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="15"/>
+            <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="15"/>
+            <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="45"/>
+            <RowDefinition Height="42"/>
         </Grid.RowDefinitions>
 
 
         <Grid x:Name="UpperBarGrid" Grid.Column="1" Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="140"/>
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal">
@@ -50,7 +50,7 @@
 
         <RichTextBox x:Name="ContentTextBox" AcceptsReturn="True" VerticalScrollBarVisibility="Visible" IsReadOnly="True" ContextMenu="{StaticResource MainContextMenu}" Grid.Column="1" Grid.Row="1"/>
 
-        <Grid x:Name="UnderBarGrid" Grid.Column="1" Grid.Row="2" Margin="0,10,0,10">
+        <Grid x:Name="UnderBarGrid" Grid.Column="1" Grid.Row="2" Margin="0,8,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="180"/>
