@@ -47,6 +47,7 @@ namespace serial_monitor.Models
                 if (Port == null)
                 {
                     Debugger.Log("Failed to get IsOpen: Port is null.", Debugger.LogLevel.WARN);
+
                     return false;
                 }
 
@@ -57,6 +58,7 @@ namespace serial_monitor.Models
                 catch (Exception e)
                 {
                     Debugger.Log("Failed to get IsOpen: \n" + e.ToString(), Debugger.LogLevel.WARN);
+
                     return false;
                 }
             }
@@ -70,12 +72,14 @@ namespace serial_monitor.Models
                 if (Port == null)
                 {
                     Debugger.Log("Cannot preread: Port is null.", Debugger.LogLevel.WARN);
+
                     return false;
                 }
 
                 try
                 {
                     bool exists = Port.BytesToRead > 0;
+
                     return exists;
                 }
                 catch (Exception e)
@@ -98,6 +102,7 @@ namespace serial_monitor.Models
                 if (value == null)
                 {
                     Debugger.Log("Putting Invalid null value to RecieveEventHandler.");
+
                     return;
                 }
                 InvokeRecieved += value;
@@ -112,11 +117,13 @@ namespace serial_monitor.Models
                 if (value == null)
                 {
                     Debugger.Log("Invalid null value to RecieveEventHandler.");
+
                     return;
                 }
                 if (InvokeRecieved == null)
                 {
                     Debugger.Log("Cannot remove Recieved: InvokeRecieved is null.", Debugger.LogLevel.WARN);
+
                     return;
                 }
 
@@ -127,6 +134,7 @@ namespace serial_monitor.Models
                 catch (Exception e)
                 {
                     Debugger.Log("Failed to remove event handler: \n" + e.ToString(), Debugger.LogLevel.WARN);
+
                     return;
                 }
             }

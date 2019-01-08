@@ -49,7 +49,7 @@ namespace serial_monitor.Windows
         {
             if (e.Key == Key.Enter)
             {
-                Send();
+                SendToPort();
             }
         }
 
@@ -59,34 +59,56 @@ namespace serial_monitor.Windows
 
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
-            VM.Opened = true;
-            VM.InitializeSerialPort();
-            VM.Recieved += (s, m) =>
-            {
-                Application.Current.Dispatcher.Invoke(new Action(() => { AddLine(m, Brushes.Green); }));
-            };
+            OpenPort();
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            VM.Opened = false;
-            VM.DisposePort();
+            ClosePort();
         }
 
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
-            Send();
+            SendToPort();
         }
 
         #endregion
 
         #region Helper
 
-        private void Send()
+        // safe: 2019-1-8
+        private void OpenPort()
         {
-            var msg = GetPrompt();
-            VM.WriteLine(msg);
-            AddLine(msg, Brushes.Orange);
+            if (! VM.InitializeSerialPort())
+            {
+                Debugger.Log("Failed to open: Failed to initialize SerialDevice.", Debugger.LogLevel.ERROR);
+                return;
+            }
+
+            VM.Opened = true;
+            VM.Recieved += (s, m) =>
+            {
+                Application.Current.Dispatcher.Invoke(new Action(() => { AddLine(m, Brushes.Green); }));
+            };
+        }
+
+        // safe: 2019-1-8
+        private void ClosePort()
+        {
+            if (! VM.DisposePort())
+            {
+                Debugger.Log("Failed to open: Failed to initialize SerialDevice.", Debugger.LogLevel.ERROR);
+                return;
+            }
+
+            VM.Opened = false;
+        }
+
+        private void SendToPort()
+        {
+            var message = GetPrompt();
+            VM.WriteLine(message);
+            AddLine(message, Brushes.Orange);
             ClearPrompt();
         }
 

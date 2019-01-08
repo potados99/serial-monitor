@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using serial_monitor.Models;
 using serial_monitor.Utils;
+using System.Windows;
 
 namespace serial_monitor.ViewModels
 {
@@ -16,20 +17,23 @@ namespace serial_monitor.ViewModels
         /// </summary>
         public static MainViewModel Instance = new MainViewModel();
 
-        #region Interface
+        #region INotifyPropertyChanged
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void Notify(string propname)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propname));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propname));
         }
 
         #endregion
 
         #region SerialPort
+
+        #region Constants
+
+        private const int DEFAULT_BAUDRATE = 9600;
+
+        #endregion
 
         #region Properties
 
@@ -62,6 +66,7 @@ namespace serial_monitor.ViewModels
                 if (SerialDeviceInstance == null)
                 {
                     Debugger.Log("Cannot add RecieveEventHandler: SerialDeviceInstance is null.", Debugger.LogLevel.WARN);
+
                     return;
                 }
                 SerialDeviceInstance.Recieved += value;
@@ -77,80 +82,81 @@ namespace serial_monitor.ViewModels
             }
         }
 
+        // Port name
         public string[] AvailablePortNames => SerialPort.GetPortNames();
-        private string portName;
-        public string PortName
-        {
-            get
-            {
-                return portName;
-            }
-            set
-            {
-                portName = value;
-            }
-        }
+        public string PortName { get; set; }
 
-        public int[] AvailableBaudRates
-        {
-            get
-            {
-                int[] baudRateArray = { 9600, 115200};
-                return baudRateArray;
-            }
-        }
-        private int baudRate = 9600;
-        public int BaudRate
-        {
-            get
-            {
-                return baudRate;
-            }
-            set
-            {
-                baudRate = value;
-            }
-        }
+        // Baudrate
+        public int[] AvailableBaudRates { get; } = { 9600, 115200 };
+        public int BaudRate { get; set; } = DEFAULT_BAUDRATE;
 
-        public string[] AvailableNewLines
-        {
-            get
-            {
-                string[] array = { "CR", "LF", "CR+LF" };
-                return array;
-            }
-        }
-        private readonly string[] newLinesValueArray = { "\r", "\n", "\r\n" };
-        public int SelectedNewLineIndex { get; set; } = 1;
-        public string NewLine => newLinesValueArray[SelectedNewLineIndex];
+        // New Line
+        public string[] AvailableNewLines { get; } = { "CR", "LF", "CR+LF" };
+        private string[] NewLinesValueArray { get; } = { "\r", "\n", "\r\n" };
+        public int SelectedNewLineIndex { get; set; } = 1; // LF: \n
+        public string NewLine => NewLinesValueArray[SelectedNewLineIndex];
 
         #endregion
 
         #region Methods
 
-        public void InitializeSerialPort()
-        {
-            try
-            {
-                SerialDeviceInstance = new SerialDevice(PortName, BaudRate, NewLine);
-            }
-            catch (ArgumentException)
-            {
-                System.Windows.MessageBox.Show("Wrong argument.");
-            }
-        }
-
-        public void WriteLine(string message)
-        {
-            SerialDeviceInstance.WriteLine(message);
-        }
-
-        public void DisposePort()
+        // exception-safe: 2019-1-8
+        // safety dependent on: SerialDevice
+        public bool InitializeSerialPort()
         {
             if (SerialDeviceInstance != null)
             {
-                SerialDeviceInstance.Dispose();
+                Debugger.Log("SerialDeviceInstance already exists. Creating new one.", Debugger.LogLevel.INFO);
             }
+            if (String.IsNullOrEmpty(PortName) || String.IsNullOrEmpty(NewLine))
+            {
+                MessageBox.Show("Fill options.");
+                return false;
+            }
+
+            try
+            {
+                SerialDeviceInstance = new SerialDevice(PortName, BaudRate, NewLine);
+                return true;
+            }
+            catch (ArgumentException e)
+            {
+                Debugger.Log("Failed initializing SerialDevice due to ArgumentException: \n" + e.ToString(), Debugger.LogLevel.ERROR);
+                MessageBox.Show("Wrong argument.");
+                return false;
+            }
+            catch (Exception others)
+            {
+                Debugger.Log("Failed initializing SerialDevice: \n" + others.ToString(), Debugger.LogLevel.ERROR);
+                MessageBox.Show("Failed creating SerialDevice instance.");
+                return false;
+            }
+        }
+
+        // null-safe & exception-safe: 2019-1-8
+        // safety depent on: SerialDevice.WriteLine
+        public bool WriteLine(string message)
+        {
+            if (SerialDeviceInstance == null)
+            {
+                Debugger.Log("Failed to write: SerialDeviceInstance in null.", Debugger.LogLevel.WARN);
+                return false;
+            }
+
+            return SerialDeviceInstance.WriteLine(message);
+        }
+
+        // null-safe & exception-safe: 2019-1-8
+        // safety depent on: SerialDevice.Dispose
+        public bool DisposePort()
+        {
+            if (SerialDeviceInstance == null)
+            {
+                Debugger.Log("Failed to dispose port: SerialDeviceInstance in null.", Debugger.LogLevel.WARN);
+                return false;
+            }
+
+            return SerialDeviceInstance.Dispose();
         }
 
         #endregion
@@ -159,18 +165,7 @@ namespace serial_monitor.ViewModels
 
         #region View
 
-        private bool scrollLock = false;
-        public bool ScrollLock
-        {
-            get
-            {
-                return scrollLock;
-            }
-            set
-            {
-                scrollLock = value;
-            }
-        }
+        public bool ScrollLock { get; set; } = false;
 
         private bool opened = false;
         public bool Opened
