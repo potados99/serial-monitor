@@ -1,6 +1,5 @@
 ﻿using serial_monitor.Utils;
 using System;
-using System.IO.Ports;
 using System.Threading;
 using CSerialWrapper;
 
@@ -13,9 +12,9 @@ namespace serial_monitor.Models
     {
         #region Properties
 
-        private CSeriallWrapper port;
+        private CSerialWrapper.CSerialWrapper port;
         // null-safe: 2018-1-8
-        private CSeriallWrapper Port
+        private CSerialWrapper.CSerialWrapper Port
         {
             get
             {
