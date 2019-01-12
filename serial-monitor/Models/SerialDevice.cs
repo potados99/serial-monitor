@@ -150,7 +150,7 @@ namespace serial_monitor.Models
         {
             try
             {
-                Port = new CSeriallWrapper(portname, baudrate, newLine);
+                Port = new CSerialWrapper.CSerialWrapper(portname, baudrate, newLine);
 
                 Debugger.Log("Created SerialPort at " + portname + ".", Debugger.LogLevel.INFO);
 
