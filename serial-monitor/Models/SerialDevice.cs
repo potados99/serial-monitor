@@ -2,6 +2,7 @@
 using System;
 using System.IO.Ports;
 using System.Threading;
+using CSerialWrapper;
 
 namespace serial_monitor.Models
 {
@@ -12,9 +13,9 @@ namespace serial_monitor.Models
     {
         #region Properties
 
-        private SerialPort port;
+        private CSeriallWrapper port;
         // null-safe: 2018-1-8
-        private SerialPort Port
+        private CSeriallWrapper Port
         {
             get
             {
@@ -150,12 +151,7 @@ namespace serial_monitor.Models
         {
             try
             {
-                Port = new SerialPort()
-                {
-                    PortName = portname,
-                    BaudRate = baudrate,
-                    NewLine = newLine
-                };
+                Port = new CSeriallWrapper(portname, baudrate, newLine);
 
                 Debugger.Log("Created SerialPort at " + portname + ".", Debugger.LogLevel.INFO);
 
